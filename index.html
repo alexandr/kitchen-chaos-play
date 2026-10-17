@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#1d2b3a">
+<title>Kitchen Chaos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍲</text></svg>">
+<style>
+  html, body { margin: 0; height: 100%; background: #1d2b3a; overflow: hidden; overscroll-behavior: none; touch-action: none;
+    -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; position: fixed; inset: 0; }
+  #gl { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+  #screen { position: fixed; inset: 0; z-index: 20; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at 50% 30%, #1d2b3acc, #0b121acc 75%);
+    overflow-y: auto; -webkit-overflow-scrolling: touch; touch-action: pan-y; padding: 10px; box-sizing: border-box; color: #fff; font: 600 15px/1.35 system-ui, -apple-system, sans-serif; }
+  .panel { background: #f6eedc; color: #2b1d12; border-radius: 16px; padding: 14px 20px 16px; box-shadow: 0 8px 0 #0006, 0 0 0 4px #2b1d12; max-width: 560px; width: 100%; box-sizing: border-box; margin: auto; }
+  .panel.wide { max-width: 760px; }
+  .panel h1 { font: 900 38px/1 "Arial Black", system-ui, sans-serif; margin: 2px 0 2px; color: #e8423a; text-shadow: 3px 3px 0 #2b1d12; letter-spacing: 1px; }
+  .panel h1 span { color: #f2a51b; }
+  .panel h2 { font: 900 24px "Arial Black", system-ui, sans-serif; margin: 2px 0 8px; }
+  .panel .sub { color: #7a5a3a; margin-bottom: 8px; }
+  .panel .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin: 8px 0; }
+  .panel .row.top { justify-content: space-between; align-items: flex-start; flex-wrap: nowrap; gap: 16px; }
+  .panel button { font: 800 16px system-ui, sans-serif; border-radius: 12px; border: 3px solid #2b1d12; padding: 10px 16px; color: #2b1d12; background: #fff; box-shadow: 0 4px 0 #2b1d12; cursor: pointer; }
+  .panel button:active { transform: translateY(3px); box-shadow: 0 1px 0 #2b1d12; }
+  .panel button.big { background: #e8423a; color: #fff; font-size: 19px; padding: 12px 22px; }
+  .panel button:disabled { opacity: 1; cursor: default; }
+  .panel input { font: 800 17px system-ui, sans-serif; border-radius: 10px; border: 3px solid #2b1d12; padding: 9px 12px; width: 7.5em; background: #fff; color: #2b1d12; }
+  #code { text-transform: uppercase; letter-spacing: 3px; width: 5.5em; }
+  .panel .msg { color: #6a5040; font-size: 14px; } .panel .msg.err { color: #c0281e; font-weight: 800; }
+  .panel .help { font-size: 12px; color: #7a6a5a; margin-top: 8px; }
+  .panel .muted { color: #8a7060; font-size: 13px; }
+  .panel .code { font: 900 40px/1 "Arial Black", monospace; letter-spacing: 6px; color: #e8423a; }
+  .panel .share { text-align: right; } .panel .link { font-size: 12px; word-break: break-all; margin: 2px 0 6px; color: #2b1d12; }
+  .players { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin: 6px 0 10px; }
+  .pl { position: relative; border: 3px solid var(--pc); border-radius: 12px; padding: 4px; background: #fff; display: flex; flex-direction: column; align-items: center; font-weight: 800; overflow: hidden; }
+  .pl .por { width: 64px; height: 64px; border-radius: 50%; background: radial-gradient(circle, #fff, #dfe8f0); box-shadow: 0 0 0 4px var(--pc); margin: 4px 0; }
+  .pl.empty .por { opacity: .35; }
+  .pl .nm { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; font-size: 14px; }
+  .pl .cn { font-size: 11px; color: #8a7060; }
+  .pl .arr { position: absolute; top: 24px; padding: 6px 7px !important; font-size: 14px !important; box-shadow: 0 2px 0 #2b1d12 !important; }
+  .pl .arr[data-d="-1"] { left: 3px; } .pl .arr[data-d="1"] { right: 3px; }
+  .levels { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 8px; margin: 6px 0; }
+  .lv { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px !important; }
+  .levels .wh { grid-column: 1 / -1; font: 900 15px system-ui; color: #7a5a3a; margin: 6px 0 -2px; border-bottom: 2px dashed #d8c8a8; }
+  .panel .note { font-size: 13px; background: #fff6d8; border-radius: 8px; padding: 6px 10px; margin: 6px 0; }
+  .lv.sel { background: #ffe08a !important; }
+  .lv b { font: 900 20px "Arial Black", sans-serif; } .lv .dishes img { width: 30px; height: 30px; } .lv .stars { color: #e8a91b; font-size: 18px; }
+  .results { text-align: center; max-width: 420px; }
+  .results table { margin: 6px auto; border-collapse: collapse; font-size: 17px; } .results td { padding: 3px 14px; text-align: left; } .results td + td { text-align: right; font-weight: 900; }
+  .results tr.tot td { border-top: 3px solid #2b1d12; font: 900 22px "Arial Black", sans-serif; }
+  .results .row { justify-content: center; }
+  .bigstars { font-size: 58px; line-height: 1.1; } .bigstars span { color: #cbbfa8; display: inline-block; }
+  .bigstars span.on { color: #f5b81b; text-shadow: 0 4px 0 #a86a10; animation: starIn .5s both; }
+  @keyframes starIn { from { transform: scale(0) rotate(-90deg); } to { transform: scale(1) rotate(0); } }
+  #screen.table { background-color: #f4f8fc; background-image: linear-gradient(90deg, #6e9bc880 50%, transparent 50%), linear-gradient(0deg, #6e9bc880 50%, transparent 50%); background-size: 44px 44px; }
+  .receipt { background: #fff; color: #222; width: min(420px, 94vw); padding: 12px 22px 14px; box-sizing: border-box; margin: auto; text-align: center;
+    box-shadow: 0 0 0 14px #f6f6f2, 0 0 0 16px #ddd, 0 14px 30px #0006; border-radius: 50% / 8%; font: 600 15px system-ui, sans-serif; }
+  .receipt .kc { font: 30px/1 'Luckiest Guy', 'Arial Black', sans-serif; color: #fff; -webkit-text-stroke: 6px #2d6fd6; paint-order: stroke fill; letter-spacing: 1px; margin: 4px 0 6px; }
+  .receipt .lvl { border-top: 2px solid #222; border-bottom: 2px solid #222; padding: 2px; font-weight: 800; }
+  .receipt table { width: 100%; margin: 6px 0; } .receipt td { padding: 2px 0; text-align: left; } .receipt td + td { text-align: right; }
+  .receipt tr.fail td { color: #b3261e; }
+  .receipt .total { border-top: 2px solid #222; padding-top: 4px; font-weight: 800; } .receipt .total b { font: 34px 'Luckiest Guy', 'Arial Black', sans-serif; vertical-align: middle; }
+  .receipt .small { font-size: 12px; color: #666; }
+  .receipt .row { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 8px; }
+  .receipt button { font: 800 15px system-ui, sans-serif; border-radius: 12px; border: 3px solid #2b1d12; padding: 8px 14px; color: #2b1d12; background: #fff; box-shadow: 0 4px 0 #2b1d12; }
+  .receipt button.big { background: #3fb04a; color: #fff; }
+  .receipt .bigstars { font-size: 50px; }
+  #pause { position: fixed; inset: 0; z-index: 30; display: none; align-items: center; justify-content: center; background: #0008; }
+  #pause.on { display: flex; }
+  #pause .strip { background: #fff; padding: 8vh 30px; min-width: min(300px, 40vw); height: 100%; box-sizing: border-box; display: flex; flex-direction: column; justify-content: center; text-align: center; clip-path: polygon(0 4%, 10% 0, 20% 4%, 30% 0, 40% 4%, 50% 0, 60% 4%, 70% 0, 80% 4%, 90% 0, 100% 4%, 100% 96%, 90% 100%, 80% 96%, 70% 100%, 60% 96%, 50% 100%, 40% 96%, 30% 100%, 20% 96%, 10% 100%, 0 96%); }
+  #pause h3 { font: 600 34px system-ui, sans-serif; color: #444; margin: 6px 0 24px; letter-spacing: 1px; }
+  #pause .ctl { font: 600 13px system-ui; color: #555; text-align: left; display: none; line-height: 1.5; } #pause .ctl.on { display: block; }
+  #pause button { display: block; width: 100%; margin: 6px 0; font: 700 20px system-ui, sans-serif; letter-spacing: 1px; border: 0; border-radius: 10px; padding: 10px; background: #eef2f6; color: #333; }
+  #pause button:active, #pause button.hi { background: #2d6fd6; color: #fff; }
+  #screen.tabletop { background-color: #f2d7b0; background-image: linear-gradient(45deg, #e07a3a 25%, transparent 25%, transparent 75%, #e07a3a 75%), linear-gradient(45deg, #e07a3a 25%, transparent 25%, transparent 75%, #e07a3a 75%);
+    background-size: 120px 120px; background-position: 0 0, 60px 60px; }
+  .notebook { position: relative; margin: auto; width: min(560px, 92vw); min-height: min(330px, 86vh); border-radius: 10px 18px 18px 10px; box-shadow: 0 14px 30px #0006; transform: rotate(-2deg); display: flex; }
+  .notebook .rings { position: absolute; left: -16px; top: 14px; bottom: 14px; width: 36px; background: radial-gradient(ellipse 15px 9px at 50% 50%, transparent 52%, #f06a5a 56%, #f06a5a 78%, transparent 82%) 0 0 / 36px 34px repeat-y; z-index: 2; }
+  .notebook.cover .plaid { flex: 1; border-radius: 10px 18px 18px 10px; padding: 28px 30px 24px 44px; color: #fff; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 14px; cursor: pointer;
+    background-color: #4a7ec0; background-image: repeating-linear-gradient(0deg, #ffffff22 0 6px, transparent 6px 26px), repeating-linear-gradient(90deg, #ffffff22 0 6px, transparent 6px 26px), repeating-linear-gradient(0deg, #2a5a9a55 0 2px, transparent 2px 13px), repeating-linear-gradient(90deg, #2a5a9a55 0 2px, transparent 2px 13px); }
+  .notebook .logo { font: 54px/0.95 'Luckiest Guy', 'Arial Black', sans-serif; color: #fff; -webkit-text-stroke: 7px #e8423a; paint-order: stroke fill; letter-spacing: 2px; transform: rotate(-3deg); text-shadow: 0 6px 0 #a3261b; }
+  .notebook .tap { font: 700 15px system-ui; color: #2b1d12; background: #fff; border-radius: 20px; padding: 6px 14px; animation: pulse 1.4s infinite; }
+  @keyframes pulse { 50% { transform: scale(1.06); } }
+  .notebook .recipes { font: 300 34px system-ui, sans-serif; letter-spacing: 6px; color: #ffffffcc; margin-top: auto; }
+  .notebook.open .page { flex: 1; background: #fff; border-radius: 6px 14px 14px 6px; padding: 14px 22px 14px 40px; color: #222; display: flex; flex-direction: column; gap: 4px;
+    background-image: repeating-linear-gradient(0deg, transparent 0 33px, #c8dcef 33px 34px); }
+  .notebook .pt { font: 26px 'Luckiest Guy', 'Arial Black', sans-serif; color: #e8423a; letter-spacing: 1px; }
+  .notebook .line { display: flex; gap: 8px; align-items: center; font: 600 15px system-ui; }
+  .notebook input { font: 800 17px system-ui, sans-serif; border-radius: 8px; border: 2px solid #888; padding: 6px 10px; width: 7.5em; background: #fff; color: #222; }
+  .notebook #code { text-transform: uppercase; letter-spacing: 3px; width: 5em; }
+  .notebook .item { font: 600 20px system-ui, sans-serif; letter-spacing: 1px; background: none; border: 0; text-align: left; padding: 5px 4px; color: #222; cursor: pointer; }
+  .notebook .item:hover, .notebook .item:active { color: #e8423a; } .notebook .item:active::before { content: '► '; }
+  .notebook .item.big { color: #fff; background: #3fb04a; border-radius: 10px; padding: 8px 12px; font-weight: 800; }
+  .notebook .item.inline { font-size: 18px; }
+  .notebook .msg { font-size: 13px; color: #666; } .notebook .msg.err { color: #c0281e; font-weight: 800; }
+  .notebook .help { font-size: 11px; color: #888; }
+  #screen.maplobby { background: none; padding: 0; display: block; overflow: hidden; touch-action: none; }
+  .maplobby .topbar { position: absolute; left: 8px; top: 8px; display: flex; gap: 8px; align-items: center; }
+  .maplobby .roomcode { background: #3e4f8a; color: #fff; border-radius: 20px; padding: 6px 14px; font: 700 15px system-ui; }
+  .maplobby .roomcode b { font: 22px 'Luckiest Guy', 'Arial Black', sans-serif; letter-spacing: 3px; vertical-align: middle; }
+  .maplobby button { font: 800 15px system-ui, sans-serif; border-radius: 12px; border: 3px solid #2b1d12; padding: 7px 12px; color: #2b1d12; background: #fff; box-shadow: 0 3px 0 #2b1d12; }
+  .maplobby .card { position: absolute; right: 10px; top: 8px; bottom: 96px; width: min(270px, 36vw); padding: 10px; box-sizing: border-box; border-radius: 14px;
+    background: #4a6f9a; background-image: linear-gradient(45deg, #ffffff14 25%, transparent 25%, transparent 75%, #ffffff14 75%), linear-gradient(-45deg, #ffffff14 25%, transparent 25%, transparent 75%, #ffffff14 75%); background-size: 22px 22px;
+    box-shadow: 0 6px 16px #0006; display: flex; }
+  .maplobby .strip { flex: 1; background: #fff; padding: 10px 14px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; align-items: stretch; color: #2b1d12;
+    clip-path: polygon(0 0, 100% 0, 97% 3%, 100% 6%, 97% 9%, 100% 12%, 97% 15%, 100% 18%, 97% 21%, 100% 24%, 97% 27%, 100% 30%, 97% 33%, 100% 36%, 97% 39%, 100% 42%, 97% 45%, 100% 48%, 97% 51%, 100% 54%, 97% 57%, 100% 60%, 97% 63%, 100% 66%, 97% 69%, 100% 72%, 97% 75%, 100% 78%, 97% 81%, 100% 84%, 97% 87%, 100% 90%, 97% 93%, 100% 96%, 100% 100%, 0 100%, 3% 96%, 0 93%, 3% 90%, 0 87%, 3% 84%, 0 81%, 3% 78%, 0 75%, 3% 72%, 0 69%, 3% 66%, 0 63%, 3% 60%, 0 57%, 3% 54%, 0 51%, 3% 48%, 0 45%, 3% 42%, 0 39%, 3% 36%, 0 33%, 3% 30%, 0 27%, 3% 24%, 0 21%, 3% 18%, 0 15%, 3% 12%, 0 9%, 3% 6%, 0 3%); }
+  .maplobby .ctitle { background: #4a4f58; color: #fff; text-align: center; border-radius: 10px; padding: 4px; font: 22px 'Luckiest Guy', 'Arial Black', sans-serif; letter-spacing: 1px; }
+  .maplobby .thumb { width: 100%; max-height: 24vh; object-fit: cover; border-radius: 8px; border: 3px solid #e6e2da; flex: none; }
+  .maplobby .startotal { position: absolute; right: min(290px, 38vw); top: 4px; font: 64px/1 sans-serif; color: #f5c430; -webkit-text-stroke: 3px #a86a10; text-shadow: 0 4px 0 #0004; }
+  .maplobby .startotal b { position: absolute; left: 0; right: 0; top: 22px; text-align: center; font: 18px 'Luckiest Guy', 'Arial Black', sans-serif; color: #fff; -webkit-text-stroke: 3px #7a4a10; paint-order: stroke fill; }
+  .maplobby .best { align-self: center; background: #3d7fc1; color: #fff; border-radius: 14px; padding: 2px 12px; font: 800 14px system-ui; }
+  .maplobby .dishrow { display: flex; justify-content: center; gap: 4px; } .maplobby .dishrow img { width: 40px; height: 40px; }
+  .maplobby .srow { display: flex; align-items: center; gap: 6px; font: 800 18px system-ui; }
+  .maplobby .srow .star { color: #f5b81b; font-size: 22px; } .maplobby .srow .tick { color: #3fb04a; font-size: 20px; }
+  .maplobby .srow i { flex: 1; border-bottom: 3px dotted #bbb; }
+  .maplobby .small { font: 600 12px system-ui; color: #777; text-align: center; }
+  .maplobby .go { position: absolute; right: 14px; bottom: 74px; width: min(262px, 35vw); z-index: 3; background: #3fb04a !important; color: #fff !important; font-size: 20px !important; padding: 10px !important; }
+  .maplobby .wait { position: absolute; right: 14px; bottom: 84px; width: min(262px, 35vw); z-index: 3; background: #fff; border-radius: 10px; padding: 6px; }
+  .maplobby .card { bottom: 128px !important; }
+  @media (max-height: 430px) { .maplobby .thumb { max-height: 26vh; object-fit: cover; } .maplobby .srow { font-size: 15px; } .maplobby .dishrow img { width: 30px; height: 30px; } .maplobby .ctitle { font-size: 18px; } }
+  .maplobby .mapnav { position: absolute; left: 10px; bottom: 100px; display: flex; gap: 8px; } .maplobby .mapnav button { font-size: 22px; padding: 6px 16px; }
+  .maplobby .players { position: absolute; left: 8px; right: 8px; bottom: 6px; margin: 0; grid-template-columns: repeat(4, minmax(0, 150px)); justify-content: center; }
+  .maplobby .pl { flex-direction: row; gap: 6px; padding: 3px 6px; background: #fffffff0; }
+  .maplobby .pl .por { width: 50px; height: 50px; margin: 2px; }
+  .maplobby .pl .nm { font-size: 13px; } .maplobby .pl .arr { position: static; padding: 3px 6px !important; }
+  .maplobby .pl .cn { display: none; }
+  #toast { position: fixed; z-index: 40; left: 50%; top: 10px; transform: translateX(-50%); background: #000c; color: #fff; padding: 8px 14px; border-radius: 10px; font: 700 14px system-ui; opacity: 0; transition: opacity .3s; pointer-events: none; }
+  #quit { position: fixed; z-index: 15; top: 6px; left: 50%; transform: translateX(-50%); display: none; font: 900 16px system-ui; color: #fff; background: #0006; border: 2px solid #fff8; border-radius: 10px; padding: 4px 12px; }
+  body.playing #quit { display: block; }
+  #rotate { position: fixed; inset: 0; z-index: 50; background: #1d2b3a; color: #fff; display: none; align-items: center; justify-content: center; flex-direction: column; font: 800 6vmin system-ui; text-align: center; }
+  @media (orientation: portrait) { body.touch #rotate { display: flex; } }
+  @media (max-height: 430px) { .panel { padding: 10px 14px; } .panel h1 { font-size: 30px; } .panel .row { margin: 5px 0; } .panel .code { font-size: 32px; } .bigstars { font-size: 44px; } }
+</style>
+<script src="./vendor/nipplejs.js"></script>
+<script src="./vendor/peerjs.min.js"></script>
+<script src="./vendor/mqtt.min.js"></script>
+<script type="importmap">{ "imports": { "three": "./vendor/three.module.js", "three/addons/": "./vendor/addons/" } }</script>
+</head>
+<body>
+<canvas id="gl"></canvas>
+<script type="module" src="./s20261017222107/main.js"></script>
+</body>
+</html>
